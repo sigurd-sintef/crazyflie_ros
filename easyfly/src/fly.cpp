@@ -1,5 +1,6 @@
+#include "ros/ros.h"
 #include <iostream>
-
+#include <sensor_msgs/Joy.h>
 #include <boost/program_options.hpp>
 #include <crazyflie_cpp/Crazyradio.h>
 #include <crazyflie_cpp/Crazyflie.h>
@@ -9,7 +10,19 @@ MUST RUN IN ROOT!!!!!!!!!!!!!!
 
 
 *************************/
+float pitch_sp=0;
+float roll_sp=0;
+float yaw_sp=0;
+float thrust_sp=0;
+
 std::string uri;
+void sticksCallback(const sensor_msgs::Joy msg)
+{
+  pitch_sp = msg.axes[5];
+  roll_sp = msg.axes[2];
+  yaw_sp = msg.axes[0];
+  thrust_sp = msg.axes[1];
+}
 int init_scan(int argc, char **argv)
 {
 
@@ -137,19 +150,30 @@ int main(int argc, char **argv)
   int ret2=connect_get_param(argc, argv);
   Crazyflie cf(uri);
   cf.requestParamToc();
-  
 
 
 
 
-  if(ret2!=0){
-    printf("error\n");
-    return 0;
+  ros::init(argc, argv, "fly");
+  ros::NodeHandle n;
+  ros::Subscriber commands_sub = n.subscribe("/joy",5,sticksCallback);
+  ros::Rate loop_rate(50);
+
+  int count = 0;
+  while (ros::ok()){
+    printf("pitch: %f\n", pitch_sp);
+    printf("roll: %f\n", roll_sp);
+    printf("yaw: %f\n", yaw_sp);
+    printf("thrust: %f\n", thrust_sp);
+
+    cf.sendSetpoint(-roll_sp*20, -pitch_sp*20, -yaw_sp*50, thrust_sp*40000);
+    ros::spinOnce();
+    loop_rate.sleep();
+    ++count;
   }
-    
-  else{
-    printf("good\n");
-    return 0;
-  }
+
+
+  return 0;
+
 
 }
