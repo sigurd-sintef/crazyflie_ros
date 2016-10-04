@@ -1,15 +1,31 @@
 #include "ros/ros.h"
 #include <iostream>
+#include <vector>
 #include <sensor_msgs/Joy.h>
 #include <boost/program_options.hpp>
 #include <crazyflie_cpp/Crazyradio.h>
 #include <crazyflie_cpp/Crazyflie.h>
+
 /******************
 
 MUST RUN IN ROOT!!!!!!!!!!!!!!
 
 
 *************************/
+// template <unsigned int num_flies>
+// class Crazyflie_multi : public Crazyflie
+// {
+// public:
+//   Crazyflie cf[num_flies];
+//   Crazyflie_multi(const std::string uri[num_flies])
+//   {
+
+//   }
+//   ~Crazyflie_multi();
+  
+// };
+
+
 std::string g_uri;
 class fly212
 {
@@ -31,17 +47,17 @@ private:
   float roll_sp[2];
   float yaw_sp[2];
   float thrust_sp[2];
-  Crazyflie cf;
+  std::vector<Crazyflie> v_cf;//Crazyflie container
 
 };
 
-fly212::fly212(int argc, char **argv):
-cf(g_uri)
+fly212::fly212(int argc, char **argv)
+
 {
+  Crazyflie cf(g_uri);
+  v_cf.push_back(cf);
   uri=g_uri;
-//  Crazyflie cf(uri);
-//  cf(uri);
-  cf.requestParamToc();
+  v_cf[0].requestParamToc();
   joy_sub0 = nh.subscribe<sensor_msgs::Joy>("/joygroup0/joy",5,&fly212::joyCallback0,this);
   joy_sub1 = nh.subscribe<sensor_msgs::Joy>("/joygroup1/joy",5,&fly212::joyCallback1,this);
 }
@@ -66,7 +82,7 @@ void fly212::iteration(const ros::TimerEvent& e)
   printf("thrust: %f\t", thrust_sp[0]);
   printf("thrust: %f\n", thrust_sp[1]);
 
-  cf.sendSetpoint(-roll_sp[0]*20, -pitch_sp[0]*20, -yaw_sp[0]*50, thrust_sp[0]*40000);
+  v_cf[0].sendSetpoint(-roll_sp[0]*20, -pitch_sp[0]*20, -yaw_sp[0]*50, thrust_sp[0]*40000);
 }
 void fly212::joyCallback0(const sensor_msgs::Joy::ConstPtr& joy)
 {
