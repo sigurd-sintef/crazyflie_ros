@@ -4,18 +4,18 @@
   <arg name="joy_dev0" default="/dev/input/js0" />
   <arg name="joy_dev1" default="/dev/input/js1" />
 
-  <group ns="joygroup0">
+  <group ns="joygroup1">
     <node pkg="joy" name="joy_node0" type="joy_node" >
       <param name="dev" value="$(arg joy_dev0)" />
     </node>
   </group>
 
-  <group ns="joygroup1">
+  <group ns="joygroup2">
     <node pkg="joy" name="joy_node1" type="joy_node" >
       <param name="dev" value="$(arg joy_dev1)" />
     </node>
   </group>
 
-  <node pkg="easyfly" name="fly" type="fly" output="screen"/>
+  <node pkg="easyfly" name="joysticks2" type="joysticks2" output="screen"/>
 
 </launch>

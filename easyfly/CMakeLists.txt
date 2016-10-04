@@ -43,3 +43,13 @@ target_link_libraries(fly
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
 )
+
+
+add_executable(joysticks2
+  src/joysticks2.cpp
+)
+
+target_link_libraries(joysticks2
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+)

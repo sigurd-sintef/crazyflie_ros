@@ -16,6 +16,6 @@
     </node>
   </group>
 
-  <node pkg="easyfly" name="fly" type="fly" output="screen"/>
+  <node pkg="easyfly" name="joysticks2" type="joysticks2" output="screen"/>
 
 </launch>

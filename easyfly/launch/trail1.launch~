@@ -8,11 +8,11 @@
     <param name="dev" value="$(arg joy_dev0)" />
   </node>
   
-
+<!--
   <node pkg="joy" name="joy_node1" type="joy_node" >
     <param name="dev" value="$(arg joy_dev1)" />
   </node>
-
+-->
 
   <node pkg="easyfly" name="fly" type="fly" output="screen"/>
 
