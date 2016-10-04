@@ -85,6 +85,8 @@ bool Crazyradio::open(uint32_t devid)
         }
         else if (deviceDescriptor.idVendor == 0x1915 &&
                  deviceDescriptor.idProduct == 0x7777) {
+            printf("usb id correct\n");
+            printf("foundid: %d\n",foundid);
             if (foundid == devid) {
                 found = device;
                 break;
@@ -92,22 +94,28 @@ bool Crazyradio::open(uint32_t devid)
             ++foundid;
         }
     }
+    printf("found: %d\n",found);
     if (found) {
         err = libusb_open(found, &m_handle);
         if (err != LIBUSB_SUCCESS) {
             std::cerr << libusb_error_name(err) << std::endl;
             libusb_free_device_list(list, 1);
+            printf("err1\n");
             return false;
         }
         libusb_device_descriptor deviceDescriptor;
         err = libusb_get_device_descriptor(found, &deviceDescriptor);
         if (err != LIBUSB_SUCCESS) {
             std::cerr << libusb_error_name(err) << std::endl;
+            printf("err2\n");
             return false;
         }
         std::stringstream sstr;
         sstr << std::hex << (deviceDescriptor.bcdDevice >> 8) << "." << (deviceDescriptor.bcdDevice & 0xFF);
         sstr >> m_version;
+    }
+    else{
+        printf("not found\n");
     }
     libusb_free_device_list(list, 1);
 
@@ -139,6 +147,7 @@ bool Crazyradio::open(uint32_t devid)
     }
     else
     {
+        printf("oops\n");
         return false;
     }
 }
