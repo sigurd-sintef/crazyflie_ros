@@ -110,8 +110,9 @@ void fly212::joyCallback1(const sensor_msgs::Joy::ConstPtr& joy)
 int connect_get_param(int argc, char **argv)
 {
 //  std::string uri;
-  std::string defaultUri2("radio://1/80/250K/E7E7E7E7E7");//2M changed to 250K
   std::string defaultUri1("radio://0/110/250K/E7E7E7E7E7");
+  std::string defaultUri2("radio://1/120/250K/E7E7E7E7E7");//2M changed to 250K
+  
   namespace po = boost::program_options;
 
   po::options_description desc("Allowed options");
