@@ -26,7 +26,8 @@ MUST RUN IN ROOT!!!!!!!!!!!!!!
 // };
 
 
-std::string g_uri;
+std::string g_uri1;
+std::string g_uri2;
 class fly212
 {
 public:
@@ -54,10 +55,13 @@ private:
 fly212::fly212(int argc, char **argv)
 
 {
-  Crazyflie cf(g_uri);
+  Crazyflie cf(g_uri1);
   v_cf.push_back(cf);
-  uri=g_uri;
   v_cf[0].requestParamToc();
+  uri=g_uri1;
+  Crazyflie cf2(g_uri2);
+  v_cf.push_back(cf2);
+  v_cf[1].requestParamToc();
   joy_sub0 = nh.subscribe<sensor_msgs::Joy>("/joygroup0/joy",5,&fly212::joyCallback0,this);
   joy_sub1 = nh.subscribe<sensor_msgs::Joy>("/joygroup1/joy",5,&fly212::joyCallback1,this);
 }
@@ -83,6 +87,7 @@ void fly212::iteration(const ros::TimerEvent& e)
   printf("thrust: %f\n", thrust_sp[1]);
 
   v_cf[0].sendSetpoint(-roll_sp[0]*20, -pitch_sp[0]*20, -yaw_sp[0]*50, thrust_sp[0]*40000);
+  v_cf[1].sendSetpoint(-roll_sp[1]*20, -pitch_sp[1]*20, -yaw_sp[1]*50, thrust_sp[1]*40000);
 }
 void fly212::joyCallback0(const sensor_msgs::Joy::ConstPtr& joy)
 {
@@ -102,97 +107,17 @@ void fly212::joyCallback1(const sensor_msgs::Joy::ConstPtr& joy)
   if(thrust_sp[1]<0)
     thrust_sp[1]=0;
 }
-int init_scan(int argc, char **argv)
-{
-
-  std::string addressStr;
-  std::string defaultAddressStr("0xE7E7E7E7E7");
-
-  namespace po = boost::program_options;
-
-  po::options_description desc("Allowed options");
-  desc.add_options()
-    ("help", "produce help message")
-    ("address", po::value<std::string>(&addressStr)->default_value(defaultAddressStr), "device address")
-  ;
-
-  try
-  {
-    po::variables_map vm;
-    po::store(po::parse_command_line(argc, argv, desc), vm);
-    po::notify(vm);
-
-    if (vm.count("help")) {
-      std::cout << desc << "\n";
-      return 0;
-    }
-  }
-  catch(po::error& e)
-  {
-    std::cerr << e.what() << std::endl << std::endl;
-    std::cerr << desc << std::endl;
-    return 1;
-  }
-
-  try
-  {
-    uint64_t address;
-    std::stringstream sstr;
-    sstr << std::hex << addressStr;
-    sstr >> address;
-//    printf("%d\n", address);
-    Crazyradio radio(0);
-    radio.setAddress(address);
-
-    for (uint8_t datarate = 0; datarate < 3; ++datarate) {
-      radio.setDatarate((Crazyradio::Datarate)datarate);
-      for (uint8_t channel = 0; channel <= 125; ++channel) {
-        radio.setChannel(channel);
-
-        uint8_t test[] = {0xFF};
-        Crazyradio::Ack ack;
-        radio.sendPacket(test, sizeof(test), ack);
-        //if there are flies powered on, following will be displayed
-        if (ack.ack) {
-          std::cout << "radio://0/" << (uint32_t)channel << "/";
-          switch(datarate) {
-          case Crazyradio::Datarate_250KPS:
-            std::cout << "250K";
-            break;
-          case Crazyradio::Datarate_1MPS:
-            std::cout << "1M";
-            break;
-          case Crazyradio::Datarate_2MPS:
-            std::cout << "2M";
-            break;
-          }
-
-          if (defaultAddressStr != addressStr) {
-            std::cout << "/" << addressStr.substr(2);
-          }
-          std::cout << std::endl;
-        }
-      }
-    }
-    return 0;
-  }
-  catch(std::exception& e)
-  {
-    std::cerr << e.what() << std::endl;
-    return 1;
-  }
-}
 int connect_get_param(int argc, char **argv)
 {
 //  std::string uri;
-  std::string defaultUri("radio://0/80/250K/E7E7E7E7E7");//2M changed to 250K
-
+  std::string defaultUri2("radio://1/80/250K/E7E7E7E7E7");//2M changed to 250K
+  std::string defaultUri1("radio://0/110/250K/E7E7E7E7E7");
   namespace po = boost::program_options;
 
   po::options_description desc("Allowed options");
   desc.add_options()
     ("help", "produce help message")
-    ("uri", po::value<std::string>(&g_uri)->default_value(defaultUri), "unique ressource identifier")
+    ("uri", po::value<std::string>(&g_uri1)->default_value(defaultUri1), "unique ressource identifier")
   ;
 
   try//without which the uri will not be valid
@@ -213,6 +138,32 @@ int connect_get_param(int argc, char **argv)
     return 1;
   }
 
+
+
+
+  po::options_description desc2("Allowed options");
+  desc2.add_options()
+    ("help", "produce help message")
+    ("uri", po::value<std::string>(&g_uri2)->default_value(defaultUri2), "unique ressource identifier")
+  ;
+
+  try//without which the uri will not be valid
+  {
+    po::variables_map vm2;
+    po::store(po::parse_command_line(argc, argv, desc2), vm2);
+    po::notify(vm2);
+
+    if (vm2.count("help")) {
+      std::cout << desc2 << "\n";
+      return 0;
+    }
+  }
+  catch(po::error& e)
+  {
+    std::cerr << e.what() << std::endl << std::endl;
+    std::cerr << desc2 << std::endl;
+    return 1;
+  }
   
 
   //   return 0;
