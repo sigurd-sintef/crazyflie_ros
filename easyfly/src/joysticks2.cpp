@@ -4,6 +4,7 @@
 #include <boost/program_options.hpp>
 #include <crazyflie_cpp/Crazyradio.h>
 #include <crazyflie_cpp/Crazyflie.h>
+#include <boost/bind.hpp>
 /******************
 
 MUST RUN IN ROOT!!!!!!!!!!!!!!
@@ -17,9 +18,8 @@ public:
   fly212(int argc, char **argv);
   void run(double frequency);
   std::string uri;
-private:
-  void joyCallback0(const sensor_msgs::Joy::ConstPtr& joy0);
-  void joyCallback1(const sensor_msgs::Joy::ConstPtr& joy1);
+
+  void joyCallback(const sensor_msgs::Joy::ConstPtr& joy, int uav);
   ros::NodeHandle nh;
 
   ros::Subscriber joy_sub0;
@@ -43,8 +43,12 @@ fly212::fly212(int argc, char **argv)//:
 //  Crazyflie cf(uri);
 //  cf(uri);
 //  cf.requestParamToc();
-  joy_sub0 = nh.subscribe<sensor_msgs::Joy>("/joygroup0/joy",5,&fly212::joyCallback0,this);
-  joy_sub1 = nh.subscribe<sensor_msgs::Joy>("/joygroup1/joy",5,&fly212::joyCallback1,this);
+ //  joy_sub0 = nh.subscribe<sensor_msgs::Joy>("/joygroup0/joy",5,&fly212::joyCallback,this);
+ //  joy_sub1 = nh.subscribe<sensor_msgs::Joy>("/joygroup1/joy",5,&fly212::joyCallback,this);
+  joy_sub0 = nh.subscribe<sensor_msgs::Joy>
+    ("/joygroup0/joy",5,boost::bind(&fly212::joyCallback, this, _1, 0));
+  joy_sub1 = nh.subscribe<sensor_msgs::Joy>
+    ("/joygroup1/joy",5,boost::bind(&fly212::joyCallback, this, _1, 1));
 }
 void fly212::run(double frequency)
 {
@@ -69,23 +73,25 @@ void fly212::iteration(const ros::TimerEvent& e)
 
 //  cf.sendSetpoint(-roll_sp[0]*20, -pitch_sp[0]*20, -yaw_sp[0]*50, thrust_sp[0]*40000);
 }
-void fly212::joyCallback0(const sensor_msgs::Joy::ConstPtr& joy)
+void fly212::joyCallback(const sensor_msgs::Joy::ConstPtr& joy, int uav)
 {
+  if(uav==0){
   pitch_sp[0] = joy->axes[5];
   roll_sp[0] = joy->axes[2];
   yaw_sp[0] = joy->axes[0];
   thrust_sp[0] = joy->axes[1];
   if(thrust_sp[0]<0)
     thrust_sp[0]=0;
-}
-void fly212::joyCallback1(const sensor_msgs::Joy::ConstPtr& joy)
-{
+  }
+  else if (uav==1){
+
   pitch_sp[1] = joy->axes[5];
   roll_sp[1] = joy->axes[2];
   yaw_sp[1] = joy->axes[0];
   thrust_sp[1] = joy->axes[1];
   if(thrust_sp[1]<0)
     thrust_sp[1]=0;
+  }
 }
 
 int main(int argc, char **argv)
