@@ -12,7 +12,13 @@ float dead_zone_f(float a, float b);
 #define DEG2RAD 0.01745
 #define RAD2DEG 57.3
 
-enum enum_mode{AttCtrl, PosCtrl, TrjCtrl};
-enum enum_state{TakingOff, Landing, Automatic, Idle};
-
+#define MODE_RAW 0
+#define MODE_POS 1
+#define MODE_TRJ 2
+#define TakingOff 0
+#define Landing 1
+#define Automatic 2
+#define RawFlying 3
+#define Idle 4
+//enum enum_TOL_cmd{TakeOff, Land, Kill}
 #endif

@@ -9,15 +9,31 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   crazyflie_cpp
+  geometry_msgs
+  message_generation
+  genmsg
+)
+add_message_files(
+  FILES
+  commands.msg
+  pos_ctrl_sp.msg
+  raw_ctrl_sp.msg
+  trj_ctrl_sp.msg
+  state_est.msg
+)
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  geometry_msgs
 )
 
 # Enable C++11
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 ## System dependencies are found with CMake's conventions
-find_package(Boost  COMPONENTS 
+find_package(Boost REQUIRED COMPONENTS 
   program_options 
-  bind
+#  bind
   REQUIRED)
 
 
@@ -27,6 +43,7 @@ catkin_package(
 #  CATKIN_DEPENDS roscpp rospy std_msgs
 #  DEPENDS system_lib
   CATKIN_DEPENDS
+  message_runtime
   crazyflie_cpp
 )
 
@@ -41,7 +58,6 @@ include_directories(
 add_executable(fly
   src/fly.cpp
 )
-
 target_link_libraries(fly
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
@@ -51,7 +67,6 @@ target_link_libraries(fly
 add_executable(joysticks2
   src/joysticks2.cpp
 )
-
 target_link_libraries(joysticks2
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}

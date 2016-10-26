@@ -9,6 +9,22 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   crazyflie_cpp
+  geometry_msgs
+  message_generation
+  genmsg
+)
+add_message_files(
+  FILES
+  commands.msg
+  pos_ctrl_sp.msg
+  raw_ctrl_sp.msg
+  trj_ctrl_sp.msg
+  state_est.msg
+)
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  geometry_msgs
 )
 
 # Enable C++11
@@ -27,6 +43,7 @@ catkin_package(
 #  CATKIN_DEPENDS roscpp rospy std_msgs
 #  DEPENDS system_lib
   CATKIN_DEPENDS
+  message_runtime
   crazyflie_cpp
 )
 
@@ -41,17 +58,22 @@ include_directories(
 add_executable(fly
   src/fly.cpp
 )
-
 target_link_libraries(fly
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
 )
 
+add_executable(commander
+  src/commander.cpp
+)
+target_link_libraries(commander
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+)
 
 add_executable(joysticks2
   src/joysticks2.cpp
 )
-
 target_link_libraries(joysticks2
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}

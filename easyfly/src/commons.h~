@@ -1,0 +1,20 @@
+#ifndef COMMONS_H
+#define COMMONS_H
+
+int constrain(int a, int b, int c);
+int dead_zone(int a, int b);
+float constrain_f(float a, float b, float c);
+float dead_zone_f(float a, float b);
+
+
+#define GRAVITY 9810
+#define VEHICLE_MASS 30
+#define DEG2RAD 0.01745
+#define RAD2DEG 57.3
+
+#define MODE_RAW 0
+#define MODE_POS 1
+#define MODE_TRJ 2
+enum enum_state{TakingOff, Landing, Automatic, RawFlying, Idle};
+//enum enum_TOL_cmd{TakeOff, Land, Kill}
+#endif
