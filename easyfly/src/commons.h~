@@ -15,6 +15,10 @@ float dead_zone_f(float a, float b);
 #define MODE_RAW 0
 #define MODE_POS 1
 #define MODE_TRJ 2
-enum enum_state{TakingOff, Landing, Automatic, RawFlying, Idle};
+#define TakingOff 0
+#define Landing 1
+#define Automatic 2
+#define RawFlying 3
+#define Idle 4
 //enum enum_TOL_cmd{TakeOff, Land, Kill}
 #endif

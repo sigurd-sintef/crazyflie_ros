@@ -20,6 +20,7 @@ add_message_files(
   raw_ctrl_sp.msg
   trj_ctrl_sp.msg
   state_est.msg
+  output.msg
 )
 generate_messages(
   DEPENDENCIES
@@ -71,10 +72,26 @@ target_link_libraries(commander
   ${Boost_LIBRARIES}
 )
 
+add_executable(linker
+  src/linker.cpp
+)
+target_link_libraries(linker
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+)
+
 add_executable(joysticks2
   src/joysticks2.cpp
 )
 target_link_libraries(joysticks2
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+)
+
+add_executable(controller
+  src/controller.cpp
+)
+target_link_libraries(controller
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
 )

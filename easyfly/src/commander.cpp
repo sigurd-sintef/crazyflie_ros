@@ -16,17 +16,15 @@ int g_joy_num=2;
 class Commander
 {
 private:
-
 	std::vector<ros::Publisher> m_rawpub_v, m_pospub_v, m_trjpub_v;
 	ros::Publisher m_cmdpub;
 	std::vector<ros::Subscriber> m_joysub_v, m_estsub_v;
-
 	int m_flight_mode;
 	//MODE_RAW 0
 	//MODE_POS 1
 	//MODE_TRJ 2
-	int m_flight_state, m_l_flight_state;
-	float m_velff_xy_P, m_velff_z_P;
+	int m_flight_state;
+//	float m_velff_xy_P, m_velff_z_P;
 	struct M_Joy
 	{
 		bool curr_buttons[14];
@@ -44,21 +42,24 @@ private:
 	};
 	std::vector<M_Ctrl> m_ctrl_v;
 	std::vector<easyfly::state_est> m_est_v;
+	easyfly::commands m_cmd_msg;
 public:
 	Commander(ros::NodeHandle& nh)
 	:m_rawpub_v(g_vehicle_num)
 	,m_pospub_v(g_vehicle_num)
 	,m_trjpub_v(g_vehicle_num)
 	,m_joysub_v(g_joy_num)
+	,m_estsub_v(g_vehicle_num)
 	,m_joy_v(g_joy_num)
 	,m_ctrl_v(g_vehicle_num)
 	,m_est_v(g_vehicle_num)
 	{
 		m_flight_state = Idle;
-		m_l_flight_state = Idle;
-		m_velff_xy_P = 0.6;
-		m_velff_z_P = 0.5;
+//		m_velff_xy_P = 0.6;
+//		m_velff_z_P = 0.5;
 		char msg_name[50];
+		m_cmd_msg.cut = 0;
+		m_cmd_msg.l_flight_state = Idle;
 		m_cmdpub = nh.advertise<easyfly::commands>("commands",1);
 		for(int i=0;i<g_vehicle_num;i++){
 			sprintf(msg_name,"/vehicle%d/raw_ctrl_sp",i);
@@ -91,29 +92,35 @@ public:
 		time_elapse += dt;
 		//cut off
 		if(m_joy_v[0].curr_buttons[4] == 1 && m_joy_v[0].curr_buttons[5] == 1){
-			//cut
+			m_cmd_msg.cut = 1;
 		}
-		else{
+		else{	
 			switch(m_flight_mode){
 				case MODE_RAW:{
 				//	static float yaw_sp;
 					for(int i=0;i<g_joy_num && i<g_vehicle_num;i++){
 						m_ctrl_v[i].rawctrl_msg.raw_att_sp.x = -m_joy_v[i].axes[0] * 30 * DEG2RAD;//+-1
 						m_ctrl_v[i].rawctrl_msg.raw_att_sp.y = m_joy_v[i].axes[1] * 30 * DEG2RAD;
-						m_ctrl_v[i].rawctrl_msg.raw_att_sp.z = m_joy_v[i].axes[2] * 20 * DEG2RAD;//rate
-						m_ctrl_v[i].rawctrl_msg.throttle = m_joy_v[i].axes[3];//0-1
+						m_ctrl_v[i].rawctrl_msg.raw_att_sp.z = m_joy_v[i].axes[3] * 20 * DEG2RAD;//rate
+						m_ctrl_v[i].rawctrl_msg.throttle = m_joy_v[i].axes[2];//0-1
 						if(m_ctrl_v[i].rawctrl_msg.throttle<0){
 							m_ctrl_v[i].rawctrl_msg.throttle=0;
-							m_rawpub_v[i].publish(m_ctrl_v[i].rawctrl_msg);
+							
 						}
+						m_rawpub_v[i].publish(m_ctrl_v[i].rawctrl_msg);
 					}
 				}
 				break;
 				case MODE_POS:{
 					if(m_joy_v[0].changed_arrow[1] == true && m_joy_v[0].curr_arrow[1] == 1){//take off
 						m_joy_v[0].changed_arrow[1] = false;
-						if(m_flight_state == Idle)
+						if(m_flight_state == Idle){
+							for(int i=0;i<g_vehicle_num;i++){
+								posspReset(i);
+								yawspReset(i);
+							}
 							m_flight_state = TakingOff;
+						}
 					}
 					else if(m_joy_v[0].changed_arrow[1] == true && m_joy_v[0].curr_arrow[1] == -1){//land
 						m_joy_v[0].changed_arrow[1] = false;
@@ -137,9 +144,9 @@ public:
 								m_ctrl_v[i].posctrl_msg.pos_sp.x += pos_move_rate[0];
 								m_ctrl_v[i].posctrl_msg.pos_sp.y += pos_move_rate[1];
 								m_ctrl_v[i].posctrl_msg.pos_sp.z += pos_move_rate[2];
-								m_ctrl_v[i].posctrl_msg.vel_ff.x = pos_move_rate[0] * m_velff_xy_P;
-								m_ctrl_v[i].posctrl_msg.vel_ff.y = pos_move_rate[1] * m_velff_xy_P;
-								m_ctrl_v[i].posctrl_msg.vel_ff.z = pos_move_rate[2] * m_velff_z_P;
+								m_ctrl_v[i].posctrl_msg.vel_ff.x = pos_move_rate[0];
+								m_ctrl_v[i].posctrl_msg.vel_ff.y = pos_move_rate[1];
+								m_ctrl_v[i].posctrl_msg.vel_ff.z = pos_move_rate[2];
 								float yaw_move_rate = m_joy_v[i].axes[2] * 20 * DEG2RAD;
 								m_ctrl_v[i].posctrl_msg.yaw_sp += yaw_move_rate;
 								m_pospub_v[i].publish(m_ctrl_v[i].posctrl_msg);
@@ -161,8 +168,6 @@ public:
 						default:
 						break;
 					}//end switch state
-					//TODO 
-
 				}//end case posctrl mode
 				break;
 				case MODE_TRJ:{
@@ -172,11 +177,10 @@ public:
 				default:
 				break;
 			}//end switch mode
-			
 		}//end of cut off case
-		//TODO state changes: from TakingOff to Automatic, from Landing to Idle
-		
-		//publish
+		m_cmd_msg.flight_state = m_flight_state;
+		m_cmdpub.publish(m_cmd_msg);
+		m_cmd_msg.l_flight_state = m_flight_state;
 	}
 	void posspReset(int index)
 	{

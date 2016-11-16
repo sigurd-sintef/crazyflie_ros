@@ -9,6 +9,7 @@ float dead_zone_f(float a, float b);
 
 #define GRAVITY 9810
 #define VEHICLE_MASS 30
+#define MAX_THRUST 100 //grams
 #define DEG2RAD 0.01745
 #define RAD2DEG 57.3
 
