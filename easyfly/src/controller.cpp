@@ -19,7 +19,7 @@
 using namespace Eigen;
 int g_vehicle_num=2;
 int g_joy_num=2;
-int node_index;
+
 double get(
     const ros::NodeHandle& n,
     const std::string& name) {
@@ -337,7 +337,6 @@ int main(int argc, char **argv)
 //  int ret = init_scan(argc, argv);
 	char indexc = *argv[1];
 	int index = indexc;
-	node_index = indexc;
 	char node_name[50];
 	sprintf(node_name, "controller%d", index);
 	ros::init(argc, argv, node_name);

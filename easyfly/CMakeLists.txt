@@ -95,3 +95,20 @@ target_link_libraries(controller
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
 )
+
+
+add_executable(xbee_linker
+  src/xbee_linker.cpp
+)
+target_link_libraries(xbee_linker
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+)
+
+add_executable(xbee_linker2
+  src/xbee_linker2.cpp
+)
+target_link_libraries(xbee_linker2
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+)

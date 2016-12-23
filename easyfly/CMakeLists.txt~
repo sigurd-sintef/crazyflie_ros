@@ -71,6 +71,7 @@ target_link_libraries(commander
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
 )
+
 add_executable(linker
   src/linker.cpp
 )
@@ -83,6 +84,14 @@ add_executable(joysticks2
   src/joysticks2.cpp
 )
 target_link_libraries(joysticks2
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+)
+
+add_executable(controller
+  src/controller.cpp
+)
+target_link_libraries(controller
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
 )
