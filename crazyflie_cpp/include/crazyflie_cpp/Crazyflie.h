@@ -4,10 +4,11 @@
 
 #include "Crazyradio.h"
 #include "crtp.h"
-#include <list>
-#include <set>
-#include <map>
+#include <functional>
 #include <iostream>
+#include <list>
+#include <map>
+#include <set>
 
 class Crazyflie
 {
